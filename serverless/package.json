@@ -1,0 +1,26 @@
+{
+  "name": "sms-opt-in-out-webhook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SMS Opt-in/Opt-out Webhook for Twilio",
+  "scripts": {
+    "test": "node test-keywords.js",
+    "test:keywords": "node test-keywords.js",
+    "test:webhook": "node test-webhook-simple.js",
+    "start": "twilio-run",
+    "deploy": "twilio-run deploy",
+    "dashboard": "node dashboard-server.js"
+  },
+  "dependencies": {
+    "@twilio/runtime-handler": "1.2.2",
+    "axios": "^0.27.2",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "twilio-run": "^3.5.4"
+  },
+  "engines": {
+    "node": "12"
+  }
+}

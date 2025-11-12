@@ -1,0 +1,9 @@
+{
+  "functions": [
+    {
+      "name": "sms-webhook-mock",
+      "path": "functions/sms-webhook-mock.js"
+    }
+  ],
+  "assets": []
+}

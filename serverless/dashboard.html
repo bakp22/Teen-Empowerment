@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Opt-In/Out Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            font-size: 1.2em;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1em;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .controls h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .test-results {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .test-results h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            background: #e9ecef;
+        }
+
+        .result-item.success {
+            border-left-color: #28a745;
+        }
+
+        .result-item.error {
+            border-left-color: #dc3545;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .result-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .result-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .result-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .result-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .result-details {
+            color: #666;
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 1.2em;
+        }
+
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .console-line {
+            margin-bottom: 5px;
+        }
+
+        .console-line.error {
+            color: #f48771;
+        }
+
+        .console-line.success {
+            color: #89d185;
+        }
+
+        .console-line.info {
+            color: #9cdcfe;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-stat {
+            text-align: center;
+        }
+
+        .summary-stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-stat-label {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="header-icon">📱</span>
+                SMS Opt-In/Out Dashboard
+            </h1>
+            <p class="subtitle">Test and monitor your Twilio webhook functionality in real-time</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTests">0</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="passedTests">0</div>
+                <div class="stat-label">Passed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="failedTests">0</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2>Test Controls</h2>
+            <div class="button-group">
+                <button onclick="runTests('keywords')">🔍 Run Keyword Tests</button>
+                <button onclick="runTests('webhook')">📡 Run Webhook Tests</button>
+                <button onclick="runTests('all')">🚀 Run All Tests</button>
+                <button onclick="clearResults()">🗑️ Clear Results</button>
+            </div>
+        </div>
+
+        <div class="test-results" id="testResults">
+            <h2>Test Results</h2>
+            <div class="empty-state">
+                <div class="empty-state-icon">🎯</div>
+                <div class="empty-state-text">Click a button above to run tests</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testStats = {
+            total: 0,
+            passed: 0,
+            failed: 0
+        };
+
+        async function runTests(testType) {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = `
+                <h2>Test Results</h2>
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Running tests...</div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/run-tests?type=${testType}`);
+                const data = await response.json();
+
+                displayResults(data);
+                updateStats(data);
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <h2>Test Results</h2>
+                    <div class="result-item error">
+                        <div class="result-header">
+                            <span class="result-title">Connection Error</span>
+                            <span class="result-status error">ERROR</span>
+                        </div>
+                        <div class="result-details">Failed to connect to test server: ${error.message}</div>
+                    </div>
+                `;
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('testResults');
+            
+            if (!data.results || data.results.length === 0) {
+                resultsDiv.innerHTML = `
+                    <h2>Test Results</h2>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <div class="empty-state-text">No test results available</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<h2>Test Results</h2>';
+
+            // Add summary
+            const total = data.results.length;
+            const passed = data.results.filter(r => r.status === 'success').length;
+            const failed = data.results.filter(r => r.status === 'error').length;
+
+            html += `
+                <div class="summary">
+                    <h3>📊 Test Summary</h3>
+                    <div class="summary-stats">
+                        <div class="summary-stat">
+                            <div class="summary-stat-number">${total}</div>
+                            <div class="summary-stat-label">Total Tests</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="summary-stat-number">${passed}</div>
+                            <div class="summary-stat-label">Passed</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="summary-stat-number">${failed}</div>
+                            <div class="summary-stat-label">Failed</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="summary-stat-number">${total > 0 ? ((passed / total) * 100).toFixed(0) : 0}%</div>
+                            <div class="summary-stat-label">Success Rate</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add results
+            data.results.forEach(result => {
+                const statusClass = result.status === 'success' ? 'success' : 'error';
+                const statusIcon = result.status === 'success' ? '✅' : '❌';
+                
+                html += `
+                    <div class="result-item ${statusClass}">
+                        <div class="result-header">
+                            <span class="result-title">${statusIcon} ${result.title || 'Test'}</span>
+                            <span class="result-status ${result.status}">${result.status.toUpperCase()}</span>
+                        </div>
+                        ${result.description ? `<div style="color: #666; margin-bottom: 10px;">${result.description}</div>` : ''}
+                        ${result.details ? `<div class="result-details">${result.details}</div>` : ''}
+                        ${result.console ? `<div class="console-output">${formatConsoleOutput(result.console)}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function formatConsoleOutput(consoleData) {
+            if (typeof consoleData === 'string') {
+                return consoleData.split('\n').map(line => {
+                    const trimmedLine = line.trim();
+                    let cssClass = '';
+                    if (trimmedLine.includes('✅') || trimmedLine.includes('PASSED')) {
+                        cssClass = 'success';
+                    } else if (trimmedLine.includes('❌') || trimmedLine.includes('ERROR') || trimmedLine.includes('FAILED')) {
+                        cssClass = 'error';
+                    } else if (trimmedLine.includes('📱') || trimmedLine.includes('🧪') || trimmedLine.includes('📊')) {
+                        cssClass = 'info';
+                    }
+                    return `<div class="console-line ${cssClass}">${escapeHtml(line)}</div>`;
+                }).join('');
+            }
+            return escapeHtml(consoleData);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateStats(data) {
+            if (data.results) {
+                testStats.total = data.results.length;
+                testStats.passed = data.results.filter(r => r.status === 'success').length;
+                testStats.failed = data.results.filter(r => r.status === 'error').length;
+            } else {
+                testStats.total = 0;
+                testStats.passed = 0;
+                testStats.failed = 0;
+            }
+
+            document.getElementById('totalTests').textContent = testStats.total;
+            document.getElementById('passedTests').textContent = testStats.passed;
+            document.getElementById('failedTests').textContent = testStats.failed;
+            document.getElementById('successRate').textContent = 
+                testStats.total > 0 ? `${((testStats.passed / testStats.total) * 100).toFixed(0)}%` : '0%';
+        }
+
+        function clearResults() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = `
+                <h2>Test Results</h2>
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎯</div>
+                    <div class="empty-state-text">Click a button above to run tests</div>
+                </div>
+            `;
+
+            testStats = { total: 0, passed: 0, failed: 0 };
+            updateStats({ results: [] });
+        }
+    </script>
+</body>
+</html>
