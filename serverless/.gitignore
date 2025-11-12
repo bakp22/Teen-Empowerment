@@ -106,3 +106,5 @@ dist
 
 # created assets
 assets/
+
+.twiliodeployinfo
